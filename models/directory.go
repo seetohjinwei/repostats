@@ -8,14 +8,26 @@ import (
 )
 
 type Directory struct {
-	Path  string
-	Name  string
-	Dirs  []Directory
-	Files []File
+	Path               string
+	Name               string
+	Dirs               []Directory
+	Files              []File
+	FileTypes          map[string]TypeData
+	RecursiveFileTypes map[string]TypeData
+}
+
+func NewDirectory(path, name string) Directory {
+	return Directory{
+		Path:      path,
+		Name:      name,
+		Dirs:      []Directory{},
+		Files:     []File{},
+		FileTypes: nil,
+	}
 }
 
 const (
-	FORMAT_NAME = "Directory [%s]:\n"
+	FORMAT_NAME = "--- Directory [%s] ---\n"
 	FORMAT_SUB  = "[%d] - %s\n"
 	FORMAT_FILE = "%s\n"
 )
@@ -46,4 +58,42 @@ func (d Directory) SubDirString(index string) (*Directory, error) {
 		return nil, err
 	}
 	return d.SubDir(ind)
+}
+
+func (d *Directory) loadFileTypes() bool {
+	if d.FileTypes == nil {
+		d.FileTypes = map[string]TypeData{}
+
+		for _, file := range d.Files {
+			_, ok := d.FileTypes[file.TypeData.Type]
+			if !ok {
+				d.FileTypes[file.TypeData.Type] = TypeData{
+					Type:      file.TypeData.Type,
+					FileCount: 0,
+					Bytes:     0,
+				}
+			}
+
+			entry := d.FileTypes[file.TypeData.Type]
+			entry.FileCount += file.TypeData.FileCount
+			entry.Bytes += file.TypeData.Bytes
+			d.FileTypes[file.TypeData.Type] = entry
+		}
+
+		return true
+	}
+
+	return false
+}
+
+func (d Directory) ListFileTypes() string {
+	d.loadFileTypes()
+
+	var sb strings.Builder
+
+	for _, typeData := range d.FileTypes {
+		sb.WriteString(typeData.ToFormatted() + "\n")
+	}
+
+	return sb.String()
 }

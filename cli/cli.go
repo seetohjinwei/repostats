@@ -27,6 +27,8 @@ func initWalk() models.Directory {
 
 func Start() {
 	dir := initWalk()
+	fmt.Println(messages.LISTING_TYPES)
+	fmt.Println(dir.ListFileTypes())
 	fmt.Println(dir.ListOptions())
 
 	scanner := bufio.NewScanner(os.Stdin)

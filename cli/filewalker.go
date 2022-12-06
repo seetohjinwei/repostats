@@ -28,7 +28,7 @@ func shouldParse(dir string) bool {
 }
 
 func parseDirectory(dir, path string, recurseLevel int) (models.Directory, error) {
-	result := models.Directory{Name: dir, Path: path}
+	result := models.NewDirectory(path, dir)
 
 	// Just in case.
 	if recurseLevel >= maxRecursion {
@@ -54,7 +54,11 @@ func parseDirectory(dir, path string, recurseLevel int) (models.Directory, error
 			}
 			result.Dirs = append(result.Dirs, subdir)
 		} else {
-			file := models.File{Path: path, Name: name}
+			info, err := f.Info()
+			if err != nil {
+				return result, err
+			}
+			file := models.NewFile(path, name, info.Size())
 			result.Files = append(result.Files, file)
 		}
 	}

@@ -4,6 +4,8 @@ const (
 	PROMPT_DIRECTORY  = "Enter starting directory: "
 	INVALID_DIRECTORY = "directory %s is invalid, please re-enter the directory"
 
+	LISTING_TYPES = "--- Types ---"
+
 	PROMPT_OPTION      = "Choose an option: "
 	LIST_OPTIONS       = LIST_OPTION_PARENT + LIST_OPTION_SUB + LIST_OPTION_ELSE
 	LIST_OPTION_PARENT = ".. - Back to parent directory\n"
