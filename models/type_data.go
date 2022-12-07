@@ -9,12 +9,29 @@ type TypeData struct {
 }
 
 const (
-	FORMAT_TYPE_DATA = "[%s]: %d files (%d bytes)"
+	FORMAT_BYTES     = "%d%s"
+	FORMAT_TYPE_DATA = "[%s]: %d %s (%s)"
 )
 
-// TODO: better byte printing, B, kB, MB, GB, TB ...
+var units []string = []string{"B", "kB", "MB", "GB", "TB"}
+
+func (td TypeData) toFormattedBytes() string {
+	index := 0
+	bytes := td.Bytes
+	for bytes >= 1000 {
+		bytes /= 1000
+		index++
+	}
+
+	return fmt.Sprintf(FORMAT_BYTES, bytes, units[index])
+}
+
 func (td TypeData) ToFormatted() string {
-	return fmt.Sprintf(FORMAT_TYPE_DATA, td.Type, td.FileCount, td.Bytes)
+	files := "files"
+	if td.FileCount == 1 {
+		files = "file"
+	}
+	return fmt.Sprintf(FORMAT_TYPE_DATA, td.Type, td.FileCount, files, td.toFormattedBytes())
 }
 
 // Returns true if x < y.
