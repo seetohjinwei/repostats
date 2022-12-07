@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 )
 
 type Directory struct {
@@ -105,7 +108,6 @@ func (d *Directory) loadFileTypes() bool {
 	return false
 }
 
-// TODO: Sort by size, count, name (alphabetical)
 func (d Directory) ListFileTypes() string {
 	d.loadFileTypes()
 
@@ -117,8 +119,11 @@ func (d Directory) ListFileTypes() string {
 
 	sb.WriteString(LISTING_TYPES)
 
-	for _, typeData := range d.FileTypes {
-		sb.WriteString(typeData.ToFormatted() + "\n")
+	fileTypes := maps.Values(d.FileTypes)
+	slices.SortFunc(fileTypes, MoreTypeData)
+
+	for _, fileType := range fileTypes {
+		sb.WriteString(fileType.ToFormatted() + "\n")
 	}
 
 	return sb.String()
