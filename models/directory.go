@@ -11,12 +11,11 @@ import (
 )
 
 type Directory struct {
-	Path               string
-	Name               string
-	Dirs               []Directory
-	Files              []File
-	FileTypes          map[string]TypeData
-	RecursiveFileTypes map[string]TypeData
+	Path      string
+	Name      string
+	Dirs      []Directory
+	Files     []File              // contains files in sub-directories too
+	FileTypes map[string]TypeData // contains file types in sub-directories too
 }
 
 func NewDirectory(path, name string) Directory {
@@ -30,7 +29,8 @@ func NewDirectory(path, name string) Directory {
 }
 
 const (
-	LISTING_TYPES = "--- Types ---\n"
+	LISTING_TYPES    = "--- Types ---\n"
+	LISTING_SUB_DIRS = "--- Sub Directories ---\n"
 
 	FORMAT_NAME = "--- Directory [%s] ---\n"
 	FORMAT_SUB  = "[%d] - %s\n"
@@ -41,7 +41,7 @@ const (
 )
 
 func (d Directory) ListEverything() string {
-	return d.ListTitle() + d.ListFileTypes() + "\n" + d.ListOptions()
+	return d.ListTitle() + d.ListFileTypes() + "\n" + d.ListSubDirs()
 }
 
 func (d Directory) ListTitle() string {
@@ -52,12 +52,14 @@ func (d Directory) ListTitle() string {
 	return sb.String()
 }
 
-func (d Directory) ListOptions() string {
+func (d Directory) ListSubDirs() string {
 	if len(d.Dirs) == 0 {
 		return NO_OPTIONS_AVAILABLE
 	}
 
 	var sb strings.Builder
+
+	sb.WriteString(LISTING_SUB_DIRS)
 
 	for i, sub := range d.Dirs {
 		sb.WriteString(fmt.Sprintf(FORMAT_SUB, i, sub.Name))

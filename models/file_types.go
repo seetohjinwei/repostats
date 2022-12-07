@@ -6,31 +6,39 @@ import (
 
 // TODO: put this in JSON / TOML file
 var types map[string]string = map[string]string{
-	"audio":            "aif cda mid midi mp3 mpa ogg wav wma wpl",
-	"data":             "csv dat db dbf log mdb sav tar xml",
-	"font":             "fnt fon",
-	"image":            "gif ico jpeg jpg png svg",
+	// data files
+	"audio":    "aif cda mid midi mp3 mpa ogg wav wma wpl",
+	"data":     "csv dat db dbf DS_Store iml log mdb sav tar xml",
+	"font":     "fnt fon",
+	"image":    "gif ico jpeg jpg png svg",
+	"json":     "json",
+	"markdown": "md mdx",
+	"pdf":      "pdf",
+	"text":     "txt",
+	"toml":     "toml",
+	"yaml":     "yml",
+
+	// programming files
 	"astro":            "astro",
 	"c":                "c",
 	"c++":              "cpp cc",
-	"css":              "css sass scss",
 	"c/c++ header":     "h",
+	"css":              "css sass scss",
 	"go":               "go",
 	"html":             "html htm",
+	"haskell":          "hs",
 	"java":             "java",
 	"javascript react": "jsx",
 	"javascript":       "js",
-	"python":           "py",
-	"sql":              "sql",
-	"ruby":             "rb",
 	"lua":              "lua",
+	"python":           "py",
+	"ruby":             "rb",
+	"sql":              "sql",
 	"typescript react": "tsx",
 	"typescript":       "ts",
 }
 
 var fileTypeMapper map[string]string = nil
-
-const unknown string = "unknown"
 
 func loadFileTypeMapper() bool {
 	// instantiate singleton
@@ -39,7 +47,7 @@ func loadFileTypeMapper() bool {
 
 		for fileType, s := range types {
 			for _, ext := range strings.Split(s, " ") {
-				fileTypeMapper[fileType] = ext
+				fileTypeMapper[ext] = fileType
 			}
 		}
 
@@ -49,12 +57,19 @@ func loadFileTypeMapper() bool {
 	return false
 }
 
+const EXTENSION_LESS string = " "
+
+// Returns the file type, or the extension itself if unknown
 func GetFileType(extension string) string {
 	loadFileTypeMapper()
 
+	if extension == "" {
+		return EXTENSION_LESS
+	}
+
 	val, ok := fileTypeMapper[extension]
 	if !ok {
-		return unknown
+		return extension
 	}
 
 	return val

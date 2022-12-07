@@ -53,6 +53,7 @@ func parseDirectory(dir, path string, recurseLevel int) (models.Directory, error
 				return result, err
 			}
 			result.Dirs = append(result.Dirs, subdir)
+			result.Files = append(result.Files, subdir.Files...) // include files in sub-directories too
 		} else {
 			info, err := f.Info()
 			if err != nil {
