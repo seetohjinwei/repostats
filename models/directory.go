@@ -32,6 +32,9 @@ const (
 	FORMAT_NAME = "--- Directory [%s] ---\n"
 	FORMAT_SUB  = "[%d] - %s\n"
 	FORMAT_FILE = "%s\n"
+
+	NO_OPTIONS_AVAILABLE = "no options available\n"
+	NO_FILES_FOUND       = "no files found\n"
 )
 
 func (d Directory) ListEverything() string {
@@ -46,8 +49,11 @@ func (d Directory) ListTitle() string {
 	return sb.String()
 }
 
-// TODO: Message for no options
 func (d Directory) ListOptions() string {
+	if len(d.Dirs) == 0 {
+		return NO_OPTIONS_AVAILABLE
+	}
+
 	var sb strings.Builder
 
 	for i, sub := range d.Dirs {
@@ -99,10 +105,13 @@ func (d *Directory) loadFileTypes() bool {
 	return false
 }
 
-// TODO: Message for no files
 // TODO: Sort by size, count, name (alphabetical)
 func (d Directory) ListFileTypes() string {
 	d.loadFileTypes()
+
+	if len(d.FileTypes) == 0 {
+		return NO_FILES_FOUND
+	}
 
 	var sb strings.Builder
 
