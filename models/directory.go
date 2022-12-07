@@ -27,15 +27,28 @@ func NewDirectory(path, name string) Directory {
 }
 
 const (
+	LISTING_TYPES = "--- Types ---\n"
+
 	FORMAT_NAME = "--- Directory [%s] ---\n"
 	FORMAT_SUB  = "[%d] - %s\n"
 	FORMAT_FILE = "%s\n"
 )
 
-func (d Directory) ListOptions() string {
+func (d Directory) ListEverything() string {
+	return d.ListTitle() + d.ListFileTypes() + "\n" + d.ListOptions()
+}
+
+func (d Directory) ListTitle() string {
 	var sb strings.Builder
 
 	sb.WriteString(fmt.Sprintf(FORMAT_NAME, d.Name))
+
+	return sb.String()
+}
+
+// TODO: Message for no options
+func (d Directory) ListOptions() string {
+	var sb strings.Builder
 
 	for i, sub := range d.Dirs {
 		sb.WriteString(fmt.Sprintf(FORMAT_SUB, i, sub.Name))
@@ -86,10 +99,14 @@ func (d *Directory) loadFileTypes() bool {
 	return false
 }
 
+// TODO: Message for no files
+// TODO: Sort by size, count, name (alphabetical)
 func (d Directory) ListFileTypes() string {
 	d.loadFileTypes()
 
 	var sb strings.Builder
+
+	sb.WriteString(LISTING_TYPES)
 
 	for _, typeData := range d.FileTypes {
 		sb.WriteString(typeData.ToFormatted() + "\n")
