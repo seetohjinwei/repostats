@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/seetohjinwei/repostats/cli/messages"
 	"github.com/seetohjinwei/repostats/models"
 )
@@ -25,7 +26,7 @@ func initWalk() *models.Directory {
 	return &models.Directory{}
 }
 
-func Start() {
+func Start(pool *pgxpool.Pool) {
 	index := 0
 	dirs := []*models.Directory{initWalk()}
 
