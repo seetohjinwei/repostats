@@ -1,4 +1,4 @@
-package github
+package data
 
 import (
 	"encoding/json"
@@ -6,12 +6,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/seetohjinwei/repostats/models"
 )
-
-// TODO: cache results in database
 
 const GITHUB_API_VERSION = "2022-11-28"
 
@@ -25,6 +24,7 @@ func getClient(url string) (http.Client, *http.Request, error) {
 	req.Header = http.Header{
 		"Accept":               {"application/vnd.github+json"},
 		"X-GitHub-Api-Version": {GITHUB_API_VERSION},
+		"Authorization":        {"token " + os.Getenv("GITHUB_TOKEN")},
 	}
 
 	return client, req, nil
@@ -57,24 +57,23 @@ func toFile(tf map[string]interface{}) models.File {
 }
 
 // Returns the Repository object for a repository at "owner/name/branch".
-func GetRepositoryWithData(owner, name, branch string) (models.Repository, error) {
-	repo := models.Repository{}
-	repo.FileTypes = map[string]models.TypeData{}
+func getRepositoryWithData(owner, name, branch string) (map[string]models.TypeData, error) {
+	typeData := map[string]models.TypeData{}
 
 	url := fmt.Sprintf(GITHUB_REPO_FILES, owner, name, branch)
 	client, req, err := getClient(url)
 	if err != nil {
-		return repo, err
+		return nil, err
 	}
 
 	res, err := client.Do(req)
 	if err != nil {
-		return repo, err
+		return nil, err
 	}
 	defer res.Body.Close()
 	bytes, err := io.ReadAll(res.Body)
 	if err != nil {
-		return repo, err
+		return nil, err
 	}
 
 	var response map[string]interface{}
@@ -87,24 +86,23 @@ func GetRepositoryWithData(owner, name, branch string) (models.Repository, error
 		}
 
 		file := toFile(object)
-		repo.Files = append(repo.Files, file)
 
-		_, ok := repo.FileTypes[file.TypeData.Type]
+		_, ok := typeData[file.TypeData.Type]
 		if !ok {
-			repo.FileTypes[file.TypeData.Type] = models.TypeData{
+			typeData[file.TypeData.Type] = models.TypeData{
 				Type:      file.TypeData.Type,
 				FileCount: 0,
 				Bytes:     0,
 			}
 		}
 
-		entry := repo.FileTypes[file.TypeData.Type]
+		entry := typeData[file.TypeData.Type]
 		entry.FileCount += file.TypeData.FileCount
 		entry.Bytes += file.TypeData.Bytes
-		repo.FileTypes[file.TypeData.Type] = entry
+		typeData[file.TypeData.Type] = entry
 	}
 
-	return repo, nil
+	return typeData, nil
 }
 
 // use to get default branch
@@ -112,7 +110,7 @@ func GetRepositoryWithData(owner, name, branch string) (models.Repository, error
 const GITHUB_REPO = "https://api.github.com/repos/%s/%s"
 
 // Returns the default branch for a repository at "owner/name".
-func GetDefaultBranch(owner, name string) (string, error) {
+func getDefaultBranch(owner, name string) (string, error) {
 	url := fmt.Sprintf(GITHUB_REPO, owner, name)
 
 	client, req, err := getClient(url)
@@ -129,6 +127,7 @@ func GetDefaultBranch(owner, name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	fmt.Println(res)
 
 	var response map[string]interface{}
 	json.Unmarshal(bytes, &response)
@@ -185,22 +184,37 @@ func getRepos(username string) ([]models.Repository, error) {
 	return result, nil
 }
 
-// TODO: takes around 10 seconds because of rate-limiting (i suspect)
-func GetReposWithData(username string) ([]models.Repository, error) {
+// TODO: double check this function is working correctly when implementing REST / DB
+func getReposWithData(username string) (map[string]models.TypeData, error) {
 	repos, err := getRepos(username)
 	if err != nil {
-		return repos, err
+		return nil, err
 	}
 
-	result := []models.Repository{}
+	typeDatas := make(map[string]models.TypeData)
 
 	for _, r := range repos {
-		repo, err := GetRepositoryWithData(username, r.Name, r.DefaultBranch)
+		typeData, err := getRepositoryWithData(username, r.Name, r.DefaultBranch)
 		if err != nil {
-			return result, err
+			return nil, err
 		}
-		result = append(result, repo)
+
+		for _, td := range typeData {
+			_, ok := typeDatas[td.Type]
+			if !ok {
+				typeDatas[td.Type] = models.TypeData{
+					Type:      td.Type,
+					FileCount: 0,
+					Bytes:     0,
+				}
+			}
+
+			entry := typeData[td.Type]
+			entry.FileCount += td.FileCount
+			entry.Bytes += td.Bytes
+			typeData[td.Type] = entry
+		}
 	}
 
-	return result, nil
+	return typeDatas, nil
 }

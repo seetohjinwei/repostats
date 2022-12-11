@@ -1,11 +1,14 @@
 package models
 
-import "fmt"
+import (
+	"database/sql/driver"
+	"fmt"
+)
 
 type TypeData struct {
-	Type      string
-	FileCount uint
-	Bytes     int64
+	Type      string `db:"language"`
+	FileCount int64  `db:"file_count"`
+	Bytes     int64  `db:"bytes"`
 }
 
 const (
@@ -50,4 +53,14 @@ func LessTypeData(x, y TypeData) bool {
 // Returns true if x > y.
 func MoreTypeData(x, y TypeData) bool {
 	return LessTypeData(y, x)
+}
+
+func (td TypeData) Value() (driver.Value, error) {
+	s := fmt.Sprintf("(%s,%d,%d)",
+		td.Type,
+		td.FileCount,
+		td.Bytes,
+	)
+
+	return []byte(s), nil
 }
