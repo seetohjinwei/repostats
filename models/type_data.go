@@ -6,9 +6,9 @@ import (
 )
 
 type TypeData struct {
-	Type      string `db:"language"`
-	FileCount int64  `db:"file_count"`
-	Bytes     int64  `db:"bytes"`
+	Type      string `db:"language" json:"language"`
+	FileCount int64  `db:"file_count" json:"file_count"`
+	Bytes     int64  `db:"bytes" json:"bytes"`
 }
 
 const (
