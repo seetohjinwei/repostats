@@ -127,7 +127,6 @@ func getDefaultBranch(owner, name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Println(res)
 
 	var response map[string]interface{}
 	json.Unmarshal(bytes, &response)
