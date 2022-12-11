@@ -5,7 +5,11 @@
 	let repository: string = "";
 
 	function handleSubmit() {
-		console.log("submitting!");
+		if (username === "" || repository === "") {
+			return;
+		}
+
+		window.location.href += `${username}/${repository}`;
 	}
 </script>
 
@@ -16,19 +20,24 @@
 
 		<form on:submit={handleSubmit}>
 			<div class="fields">
-				<input type="text" bind:value={username} placeholder="Username" />
-				<input type="text" bind:value={repository} placeholder="Repository" />
+				<input type="text" bind:value={username} placeholder="username" required />
+				<input type="text" bind:value={repository} placeholder="repository" required />
 			</div>
 
 			<button type="submit">Search <Icon name="right-arrow" /></button>
 		</form>
 
 		<p class="links">
-			<a href="https://github.com/seetohjinwei/repostats" target="_blank" rel="noopener noreferrer"
-				>Source Code</a
+			<a
+				class="source"
+				href="https://github.com/seetohjinwei/repostats"
+				target="_blank"
+				rel="noopener noreferrer">Source Code</a
 			>
 			| Made by
-			<a href="https://jinwei.dev" target="_blank" rel="noopener noreferrer">Jin Wei</a>
+			<a class="author" href="https://jinwei.dev" target="_blank" rel="noopener noreferrer"
+				>Jin Wei</a
+			>
 		</p>
 	</div>
 </div>
@@ -101,6 +110,8 @@
 	}
 
 	p.links {
+		opacity: 0.7;
+
 		a {
 			$trans: 0.5s cubic-bezier(0.06, 0.53, 0.56, 0.34);
 			color: $link-text;
@@ -109,8 +120,21 @@
 
 			&:hover,
 			&:active {
-				box-shadow: inset 100px 0 0 0 $link-text;
 				color: $page-bg;
+			}
+		}
+
+		.source {
+			&:hover,
+			&:active {
+				box-shadow: inset 10ch 0 0 0 $link-text;
+			}
+		}
+
+		.author {
+			&:hover,
+			&:active {
+				box-shadow: inset 6ch 0 0 0 $link-text;
 			}
 		}
 	}
