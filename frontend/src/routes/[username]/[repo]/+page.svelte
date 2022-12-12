@@ -1,16 +1,24 @@
 <script lang="ts">
-	import { TypeDataPrettify, TypeDataReverseCompareFn } from "../../../models/type_data.svelte";
+	import {
+		TypeDataPrettify,
+		TypeDataReverseCompareFn,
+		TypeDataToChartJS,
+	} from "../../../models/type_data.svelte";
 	import type { PageData } from "./$types";
+	import { Doughnut } from "svelte-chartjs";
+	import { Chart as ChartJS, ArcElement, Tooltip } from "chart.js";
+	ChartJS.register(ArcElement, Tooltip);
+
+	const LIMIT = 5;
 
 	export let data: PageData;
 
 	const githubLink: string = `https://github.com/${data.username}/${data.repo}/`;
 
-	const languages = Object.values(data.typeData)
-		.sort(TypeDataReverseCompareFn)
-		.map(TypeDataPrettify);
-
-	const truncatedLanguages = languages.slice(0, 5);
+	const sorted = Object.values(data.typeData).sort(TypeDataReverseCompareFn);
+	const languages = sorted.map(TypeDataPrettify);
+	const truncatedLanguages = languages.slice(0, LIMIT);
+	const doughnutData = TypeDataToChartJS(sorted, LIMIT);
 </script>
 
 <div class="wrapper">
@@ -22,11 +30,17 @@
 		{:else}
 			<a target="_blank" rel="noopener noreferrer" href={githubLink}>{githubLink}</a>
 
-			{#each truncatedLanguages as td}
-				<p>{td}</p>
-			{/each}
+			<div class="content">
+				<div class="list">
+					{#each truncatedLanguages as td}
+						<p>{td}</p>
+					{/each}
+				</div>
 
-			<!-- TODO: pie chart or other visualisation? -->
+				<div class="chart">
+					<Doughnut data={doughnutData} options={{ responsive: true }} />
+				</div>
+			</div>
 
 			<p class="links">
 				<a class="more" href="..">Check out another!</a>
@@ -97,6 +111,23 @@
 			&:active {
 				box-shadow: inset 6ch 0 0 0 $link-text;
 			}
+		}
+	}
+
+	.content {
+		margin: 2em 0;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column-reverse;
+
+		@media (min-width: 1000px) {
+			flex-direction: row;
+			gap: 50px;
+		}
+
+		.chart {
+			height: 200px;
 		}
 	}
 </style>
