@@ -13,3 +13,9 @@ https://repostats.jinwei.dev/
 | SASS                | CSS's less verbose cousin       |
 | PostgreSQL          | caching data to not get banned  |
 | GitHub API          | i don't want to write a crawler |
+
+## Blog Post
+
+Learn more about RepoStats in my blog post!
+
+https://jinwei.dev/blog/building-repostats/
