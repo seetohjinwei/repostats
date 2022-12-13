@@ -3,9 +3,26 @@
 
 	let username: string = "";
 	let repository: string = "";
+	let error: string = "";
+	const resetError = () => (error = "");
+
+	// Regex from: https://github.com/shinnn/github-username-regex
+	const usernameTest = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i;
+
+	// StackOverflow answer that talks about is a valid GitHub repo name: https://stackoverflow.com/a/64147124/
+	// I can't find a lot of information surrounding this, but I believe it should be largely true.
+	// Furthermore, the regex is intentionally less restrictive (read: doesn't check the length).
+	const repositoryTest = /^[a-zA-Z\d._-]+$/i;
 
 	function handleSubmit() {
-		if (username === "" || repository === "") {
+		// `api` is reserved on both GitHub and RepoStats
+		if (username === "api" || username === "" || !usernameTest.test(username)) {
+			error = `"${username}" is not a valid username!`;
+			return;
+		}
+
+		if (repository === "" || !repositoryTest.test(repository)) {
+			error = `"${repository}" is not a valid repository name!`;
 			return;
 		}
 
@@ -24,6 +41,7 @@
 				<input type="text" bind:value={repository} placeholder="repository" required />
 			</div>
 
+			<div id="error" on:click={resetError} on:keypress={resetError}>{error}</div>
 			<button type="submit">Search <Icon name="right-arrow" /></button>
 		</form>
 
@@ -107,6 +125,10 @@
 			font-size: medium;
 			padding: 0.7ch 1.5ch;
 		}
+	}
+
+	#error {
+		cursor: pointer;
 	}
 
 	p.links {
