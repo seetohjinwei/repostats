@@ -47,16 +47,57 @@
 			{ language: "others", file_count: 0, bytes: 0 },
 		);
 
+		// Colour scheme from: https://www.schemecolor.com/orange-green-blue-pie-chart.php
+		const colors = ["#F47A1F", "#FDBB2F", "#377B2B", "#7AC142", "#007CC3", "#00529B"];
+		const labelColors = ["#6C0B89", "#3A1B2F"];
+
 		const datasets = [
 			{
+				label: "bytes",
+				data: [...truncated.map((td) => td.bytes), others.bytes],
+				backgroundColor: colors,
+				hoverOffset: 4,
+			},
+			{
+				label: "file count",
 				data: [...truncated.map((td) => td.file_count), others.file_count],
-				// Colour scheme from: https://www.schemecolor.com/orange-green-blue-pie-chart.php
-				backgroundColor: ["#F47A1F", "#FDBB2F", "#377B2B", "#7AC142", "#007CC3", "#00529B"],
+				backgroundColor: colors,
 				hoverOffset: 4,
 			},
 		];
 
-		return { labels, datasets };
+		const legendButtons = ["bytes", "file count"];
+
+		const data = { labels, datasets };
+		const options = {
+			responsive: true,
+			plugins: {
+				legend: {
+					onClick: function (e: any, legendItem: any, legend: any) {
+						const legendIndex: number = legendButtons.findIndex((x) => x === legendItem.text);
+						const ci = legend.chart;
+						ci.getDatasetMeta(legendIndex).hidden = !ci.getDatasetMeta(legendIndex).hidden;
+						ci.update();
+					},
+					display: true,
+					position: "bottom",
+					labels: {
+						generateLabels: (chart: any) => {
+							return chart.data.labels.slice(0, legendButtons.length).map((l: any, i: number) => ({
+								fontColor: "#f3efe0",
+								datasetIndex: i,
+								text: legendButtons[i],
+								fillStyle: labelColors[i],
+								strokeStyle: labelColors[i],
+								hidden: chart.getDatasetMeta(i).hidden,
+							}));
+						},
+					},
+				},
+			},
+		};
+
+		return [data, options];
 	}
 
 	export function TypeDataCompareFn(a: TypeData, b: TypeData): number {

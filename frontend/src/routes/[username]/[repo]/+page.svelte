@@ -6,8 +6,8 @@
 	} from "../../../models/type_data.svelte";
 	import type { PageData } from "./$types";
 	import { Doughnut } from "svelte-chartjs";
-	import { Chart as ChartJS, ArcElement, Tooltip } from "chart.js";
-	ChartJS.register(ArcElement, Tooltip);
+	import { Chart as ChartJS, ArcElement, Legend, Tooltip } from "chart.js";
+	ChartJS.register(ArcElement, Legend, Tooltip);
 
 	const LIMIT = 5;
 
@@ -18,7 +18,7 @@
 	const sorted = Object.values(data.typeData).sort(TypeDataReverseCompareFn);
 	const languages = sorted.map(TypeDataPrettify);
 	const truncatedLanguages = languages.slice(0, LIMIT);
-	const doughnutData = TypeDataToChartJS(sorted, LIMIT);
+	const [doughnutData, doughnutOptions] = TypeDataToChartJS(sorted, LIMIT);
 </script>
 
 <div class="wrapper">
@@ -38,7 +38,7 @@
 				</div>
 
 				<div class="chart">
-					<Doughnut data={doughnutData} options={{ responsive: true }} />
+					<Doughnut data={doughnutData} options={doughnutOptions} />
 				</div>
 			</div>
 
