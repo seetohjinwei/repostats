@@ -26,13 +26,11 @@ func addRepository(pool *pgxpool.Pool, username, repo, default_branch string) {
 	`, username, repo, default_branch)
 }
 
-// Upserts type data for a repository.
+// Updates type data for a repository.
 // Creates the repository, if it does not exist.
-//
-// Upsert => insert or update.
-func upsertTypeData(pool *pgxpool.Pool, username, repo, default_branch string, typeData []models.TypeData) {
+func updateTypeData(pool *pgxpool.Pool, username, repo, default_branch string, typeData []models.TypeData) {
 	pool.Exec(context.Background(), `
-	CALL upsert_typedata($1, $2, $3, $4);
+	CALL update_typedata($1, $2, $3, $4);
 	`, username, repo, default_branch, pq.Array(typeData))
 }
 

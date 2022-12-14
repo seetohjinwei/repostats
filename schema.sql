@@ -93,15 +93,15 @@ CREATE TYPE TypeDataShape AS (
 );
 
 /**
-  * Upserts TypeData for a repository.
+  * Updates TypeData for a repository.
   *
+  * Deletes the old TypeData and adds the new TypeData.
   * Creates the repository, if the repository does not exist.
 */
-CREATE OR REPLACE PROCEDURE upsert_typedata(_username TEXT, _repo TEXT, _default_branch TEXT, _type_data TypeDataShape[])
+CREATE OR REPLACE PROCEDURE update_typedata(_username TEXT, _repo TEXT, _default_branch TEXT, _type_data TypeDataShape[])
 AS $$
 DECLARE
   repo_count INT;
-  tempTable CONSTANT TEXT := '_temp_upsert_typedata';
   _td TypeDataShape;
 BEGIN
   SELECT COUNT(*) INTO repo_count FROM Repositories R WHERE R.username = $1 AND R.repo = $2;
@@ -111,17 +111,11 @@ BEGIN
     CALL add_repo($1, $2, $3);
   END IF;
 
-  CREATE TEMPORARY TABLE tempTable (LIKE TypeData INCLUDING ALL)
-  ON COMMIT DROP;
+  DELETE FROM TypeData WHERE username = $1 AND repo = $2;
 
   FOREACH _td IN ARRAY $4 LOOP
-    INSERT INTO tempTable VALUES ($1, $2, _td.language, _td.file_count, _td.bytes);
+    INSERT INTO TypeData VALUES ($1, $2, _td.language, _td.file_count, _td.bytes);
   END LOOP;
-
-  INSERT INTO TypeData (SELECT * FROM tempTable)
-  ON CONFLICT (username, repo, language) DO UPDATE
-		SET file_count = excluded.file_count,
-			bytes = excluded.bytes;
 
   -- Update `last_updated` field.
   UPDATE Repositories
@@ -140,9 +134,10 @@ SELECT * FROM Repositories; -- should have [3]
 CALL update_repos('__user', array[('__user', '__repo3', NULL, 'main'), ('__user', '__repo4', NULL, 'main')]::Repositories[]);
 SELECT * FROM Repositories; -- should have [3, 4]
 
-CALL upsert_typedata('__user', '__repo', 'main', array[('java', 1, 420), ('go', 2, 34)]::TypeDataShape[]);
-CALL upsert_typedata('__user', '__repo', 'main', array[('java', 2, 200), ('py', 111, 3)]::TypeDataShape[]);
-SELECT * FROM TypeData;
+CALL update_typedata('__user', '__repo', 'main', array[('java', 1, 420), ('go', 2, 34)]::TypeDataShape[]);
+SELECT * FROM TypeData; -- should have [(java, 1, 420), (go, 2, 34)]
+CALL update_typedata('__user', '__repo', 'main', array[('java', 2, 200), ('py', 111, 3)]::TypeDataShape[]);
+SELECT * FROM TypeData; -- should have [(java, 2, 200), (py, 111, 3)]
 
 DELETE FROM Users WHERE username = '__user';
 */

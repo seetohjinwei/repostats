@@ -36,7 +36,7 @@ func ForceQueryRepository(pool *pgxpool.Pool, username, repo string) (map[string
 		return nil, err
 	}
 
-	upsertTypeData(pool, username, repo, branch, maps.Values(typeData))
+	updateTypeData(pool, username, repo, branch, maps.Values(typeData))
 
 	return typeData, nil
 }
