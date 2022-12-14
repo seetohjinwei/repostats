@@ -24,7 +24,7 @@ func updateRepositories(pool *pgxpool.Pool, username string, repos []models.PSQL
 func queryUserLastUpdated(pool *pgxpool.Pool, username string) (*time.Time, error) {
 	row := pool.QueryRow(context.Background(), `
 	SELECT last_updated FROM Users U
-	WHERE U.username = $1;
+	WHERE U.username LIKE $1;
 	`, username)
 	last_updated := &time.Time{}
 
@@ -43,7 +43,7 @@ func queryCachedUser(pool *pgxpool.Pool, username string) ([]models.PSQLReposito
 
 	rows, err := pool.Query(context.Background(), `
 	SELECT * FROM Repositories R
-	WHERE R.username = $1;
+	WHERE R.username LIKE $1;
 	`, username)
 	if err != nil {
 		return repos, err
@@ -83,8 +83,8 @@ func updateTypeData(pool *pgxpool.Pool, username, repo, default_branch string, t
 func queryRepositoryLastUpdated(pool *pgxpool.Pool, username, repo string) (*time.Time, error) {
 	row := pool.QueryRow(context.Background(), `
 	SELECT last_updated FROM Repositories R
-	WHERE R.username = $1
-		AND R.repo = $2;
+	WHERE R.username LIKE $1
+		AND R.repo LIKE $2;
 	`, username, repo)
 	last_updated := &time.Time{}
 
@@ -103,8 +103,8 @@ func queryCachedRepository(pool *pgxpool.Pool, username, repo string) (map[strin
 
 	rows, err := pool.Query(context.Background(), `
 	SELECT * FROM TypeData TD
-	WHERE TD.username = $1
-		AND TD.repo = $2;
+	WHERE TD.username LIKE $1
+		AND TD.repo LIKE $2;
 	`, username, repo)
 	if err != nil {
 		return typeData, err
