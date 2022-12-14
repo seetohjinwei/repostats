@@ -12,20 +12,6 @@ import (
 
 // These functions all silently fail.
 
-// Adds a user.
-func addUser(pool *pgxpool.Pool, username string) {
-	pool.Exec(context.Background(), `
-	INSERT INTO Users VALUES ($1);
-	`, username)
-}
-
-// Adds a repository.
-func addRepository(pool *pgxpool.Pool, username, repo, default_branch string) {
-	pool.Exec(context.Background(), `
-	CALL add_repo($1, $2, $3);
-	`, username, repo, default_branch)
-}
-
 // Updates type data for a repository.
 // Creates the repository, if it does not exist.
 func updateRepositories(pool *pgxpool.Pool, username string, repos []models.PSQLRepository) {

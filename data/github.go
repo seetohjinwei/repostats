@@ -182,38 +182,3 @@ func getRepos(username string) ([]models.PSQLRepository, error) {
 
 	return result, nil
 }
-
-// TODO: double check this function is working correctly when implementing REST / DB
-func getReposWithData(username string) (map[string]models.TypeData, error) {
-	repos, err := getRepos(username)
-	if err != nil {
-		return nil, err
-	}
-
-	typeDatas := make(map[string]models.TypeData)
-
-	for _, r := range repos {
-		typeData, err := getRepositoryWithData(username, r.Repo, r.DefaultBranch)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, td := range typeData {
-			_, ok := typeDatas[td.Type]
-			if !ok {
-				typeDatas[td.Type] = models.TypeData{
-					Type:      td.Type,
-					FileCount: 0,
-					Bytes:     0,
-				}
-			}
-
-			entry := typeData[td.Type]
-			entry.FileCount += td.FileCount
-			entry.Bytes += td.Bytes
-			typeData[td.Type] = entry
-		}
-	}
-
-	return typeDatas, nil
-}
