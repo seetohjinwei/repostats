@@ -42,14 +42,14 @@ AS $$
 DECLARE
   user_count INT;
 BEGIN
-  SELECT COUNT(*) INTO user_count FROM Users U WHERE U.username = $1;
+  SELECT COUNT(*) INTO user_count FROM Users U WHERE U.username LIKE $1;
 
   IF user_count < 1 THEN
     -- Create user, if not exists.
-    INSERT INTO Users VALUES ($1);
+    INSERT INTO Users VALUES (LOWER($1));
   END IF;
 
-  INSERT INTO Repositories VALUES ($1, $2, NULL, $3);
+  INSERT INTO Repositories VALUES (LOWER($1), LOWER($2), NULL, LOWER($3));
 END; $$ LANGUAGE plpgsql;
 
 /**
@@ -64,23 +64,23 @@ DECLARE
   user_count INT;
   _repo Repositories;
 BEGIN
-  SELECT COUNT(*) INTO user_count FROM Users U WHERE U.username = $1;
+  SELECT COUNT(*) INTO user_count FROM Users U WHERE U.username LIKE $1;
 
   IF user_count < 1 THEN
     -- Create user, if not exists.
-    INSERT INTO Users VALUES ($1);
+    INSERT INTO Users VALUES (LOWER($1));
   END IF;
 
-  DELETE FROM Repositories WHERE username = $1;
+  DELETE FROM Repositories WHERE username LIKE $1;
 
   FOREACH _repo IN ARRAY $2 LOOP
-    INSERT INTO Repositories VALUES ($1, _repo.repo, NULL,  _repo.default_branch);
+    INSERT INTO Repositories VALUES (LOWER($1), LOWER(_repo.repo), NULL, LOWER(_repo.default_branch));
   END LOOP;
 
   -- Update `last_updated` field.
   UPDATE Users
     SET last_updated = NOW()
-    WHERE username = $1;
+    WHERE username LIKE $1;
 END; $$ LANGUAGE plpgsql;
 
 /**
@@ -104,24 +104,24 @@ DECLARE
   repo_count INT;
   _td TypeDataShape;
 BEGIN
-  SELECT COUNT(*) INTO repo_count FROM Repositories R WHERE R.username = $1 AND R.repo = $2;
+  SELECT COUNT(*) INTO repo_count FROM Repositories R WHERE R.username LIKE $1 AND R.repo LIKE $2;
 
   IF repo_count < 1 THEN
     -- Create repository, if don't exist.
     CALL add_repo($1, $2, $3);
   END IF;
 
-  DELETE FROM TypeData WHERE username = $1 AND repo = $2;
+  DELETE FROM TypeData WHERE username LIKE $1 AND repo LIKE $2;
 
   FOREACH _td IN ARRAY $4 LOOP
-    INSERT INTO TypeData VALUES ($1, $2, _td.language, _td.file_count, _td.bytes);
+    INSERT INTO TypeData VALUES (LOWER($1), LOWER($2), LOWER(_td.language), _td.file_count, _td.bytes);
   END LOOP;
 
   -- Update `last_updated` field.
   UPDATE Repositories
     SET last_updated = NOW()
-    WHERE username = $1
-      AND repo = $2;
+    WHERE username LIKE $1
+      AND repo LIKE $2;
 END; $$ LANGUAGE plpgsql;
 
 /*
