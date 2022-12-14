@@ -141,9 +141,9 @@ func getDefaultBranch(owner, name string) (string, error) {
 
 const GITHUB_USERNAME_REPOS = "https://api.github.com/users/%s/repos"
 
-// Returns a list of repositories, with only the Name and DefaultBranch fields populated.
-func getRepos(username string) ([]models.Repository, error) {
-	var result []models.Repository
+// Returns a list of simple repositories.
+func getRepos(username string) ([]models.PSQLRepository, error) {
+	var result []models.PSQLRepository
 
 	url := fmt.Sprintf(GITHUB_USERNAME_REPOS, username)
 
@@ -173,8 +173,8 @@ func getRepos(username string) ([]models.Repository, error) {
 		name := repo["name"].(string)
 		branch := repo["default_branch"].(string)
 
-		repo := models.Repository{
-			Name:          name,
+		repo := models.PSQLRepository{
+			Repo:          name,
 			DefaultBranch: branch,
 		}
 		result = append(result, repo)
@@ -193,7 +193,7 @@ func getReposWithData(username string) (map[string]models.TypeData, error) {
 	typeDatas := make(map[string]models.TypeData)
 
 	for _, r := range repos {
-		typeData, err := getRepositoryWithData(username, r.Name, r.DefaultBranch)
+		typeData, err := getRepositoryWithData(username, r.Repo, r.DefaultBranch)
 		if err != nil {
 			return nil, err
 		}

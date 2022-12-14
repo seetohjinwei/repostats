@@ -12,6 +12,30 @@ import (
 // Without the token, the rate-limit is only 60.
 const CACHE_DURATION time.Duration = time.Hour * 1
 
+// Queries user, with potentially cached result.
+func QueryUser(pool *pgxpool.Pool, username string) ([]models.PSQLRepository, error) {
+	last_updated, err := queryUserLastUpdated(pool, username)
+
+	if err == nil && last_updated.Add(CACHE_DURATION).After(time.Now()) {
+		// Use cached result.
+		return queryCachedUser(pool, username)
+	}
+
+	return ForceQueryUser(pool, username)
+}
+
+// Forcefully queries repository from GitHub API.
+func ForceQueryUser(pool *pgxpool.Pool, username string) ([]models.PSQLRepository, error) {
+	repos, err := getRepos(username)
+	if err != nil {
+		return nil, err
+	}
+
+	updateRepositories(pool, username, repos)
+
+	return repos, nil
+}
+
 // Queries repository, with potentially cached result.
 func QueryRepository(pool *pgxpool.Pool, username, repo string) (map[string]models.TypeData, error) {
 	last_updated, err := queryRepositoryLastUpdated(pool, username, repo)

@@ -10,6 +10,8 @@ func Start(pool *pgxpool.Pool) {
 	router := gin.New()
 	router.Use(gin.Recovery(), gin.Logger())
 
+	router.GET("/user", GetUser(pool))
+	router.GET("/user_force", ForceGetUser(pool))
 	router.GET("/repo", GetRepo(pool))
 	router.GET("/repo_force", ForceGetRepo(pool))
 

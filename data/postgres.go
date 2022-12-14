@@ -28,6 +28,65 @@ func addRepository(pool *pgxpool.Pool, username, repo, default_branch string) {
 
 // Updates type data for a repository.
 // Creates the repository, if it does not exist.
+func updateRepositories(pool *pgxpool.Pool, username string, repos []models.PSQLRepository) {
+	pool.Exec(context.Background(), `
+	CALL update_repos($1, $2);
+	`, username, pq.Array(repos))
+}
+
+// Gets the last updated value for a user.
+func queryUserLastUpdated(pool *pgxpool.Pool, username string) (*time.Time, error) {
+	row := pool.QueryRow(context.Background(), `
+	SELECT last_updated FROM Users U
+	WHERE U.username = $1;
+	`, username)
+	last_updated := &time.Time{}
+
+	err := row.Scan(&last_updated)
+
+	if last_updated == nil {
+		return nil, errors.New("no entry")
+	}
+
+	return last_updated, err
+}
+
+// Gets the simple repositories for a user.
+func queryCachedUser(pool *pgxpool.Pool, username string) ([]models.PSQLRepository, error) {
+	repos := []models.PSQLRepository{}
+
+	rows, err := pool.Query(context.Background(), `
+	SELECT * FROM Repositories R
+	WHERE R.username = $1;
+	`, username)
+	if err != nil {
+		return repos, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var name string
+		var default_branch string
+
+		// nil => ignore
+		err := rows.Scan(nil, &name, nil, &default_branch)
+		if err != nil {
+			return repos, err
+		}
+
+		repo := models.PSQLRepository{
+			Repo:          name,
+			DefaultBranch: default_branch,
+		}
+
+		repos = append(repos, repo)
+	}
+
+	return repos, nil
+}
+
+// Updates type data for a repository.
+// Creates the repository, if it does not exist.
 func updateTypeData(pool *pgxpool.Pool, username, repo, default_branch string, typeData []models.TypeData) {
 	pool.Exec(context.Background(), `
 	CALL update_typedata($1, $2, $3, $4);
