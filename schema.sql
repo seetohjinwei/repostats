@@ -15,7 +15,7 @@ CREATE TABLE Users (
 );
 
 CREATE TABLE Repositories (
-  username TEXT REFERENCES Users (username),
+  username TEXT REFERENCES Users (username) ON DELETE CASCADE ON UPDATE CASCADE,
   repo TEXT,
   last_updated TIMESTAMP WITH TIME ZONE,
   default_branch TEXT NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE TypeData (
   file_count INT NOT NULL,
   bytes INT NOT NULL,
   PRIMARY KEY (username, repo, language),
-  FOREIGN KEY (username, repo) REFERENCES Repositories (username, repo)
+  FOREIGN KEY (username, repo) REFERENCES Repositories (username, repo) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 /**
@@ -50,6 +50,37 @@ BEGIN
   END IF;
 
   INSERT INTO Repositories VALUES ($1, $2, NULL, $3);
+END; $$ LANGUAGE plpgsql;
+
+/**
+  * Updates repositories for a user.
+  *
+  * Deletes the old repositories and adds the new repositories.
+  * Creates the user, if the user does not exist.
+*/
+CREATE OR REPLACE PROCEDURE update_repos(_username TEXT, _repos Repositories[])
+AS $$
+DECLARE
+  user_count INT;
+  _repo Repositories;
+BEGIN
+  SELECT COUNT(*) INTO user_count FROM Users U WHERE U.username = $1;
+
+  IF user_count < 1 THEN
+    -- Create user, if not exists.
+    INSERT INTO Users VALUES ($1);
+  END IF;
+
+  DELETE FROM Repositories WHERE username = $1;
+
+  FOREACH _repo IN ARRAY $2 LOOP
+    INSERT INTO Repositories VALUES ($1, _repo.repo, NULL,  _repo.default_branch);
+  END LOOP;
+
+  -- Update `last_updated` field.
+  UPDATE Users
+    SET last_updated = NOW()
+    WHERE username = $1;
 END; $$ LANGUAGE plpgsql;
 
 /**
@@ -102,11 +133,16 @@ END; $$ LANGUAGE plpgsql;
 /*
 --- FOR TESTING ---
 
+CALL update_repos('__user', array[('__user', '__repo1', NULL, 'main'), ('__user', '__repo2', NULL, 'master')]::Repositories[]);
+SELECT * FROM Repositories; -- should have [1, 2]
+CALL update_repos('__user', array[('__user', '__repo3', NULL, 'main')]::Repositories[]);
+SELECT * FROM Repositories; -- should have [3]
+CALL update_repos('__user', array[('__user', '__repo3', NULL, 'main'), ('__user', '__repo4', NULL, 'main')]::Repositories[]);
+SELECT * FROM Repositories; -- should have [3, 4]
+
 CALL upsert_typedata('__user', '__repo', 'main', array[('java', 1, 420), ('go', 2, 34)]::TypeDataShape[]);
 CALL upsert_typedata('__user', '__repo', 'main', array[('java', 2, 200), ('py', 111, 3)]::TypeDataShape[]);
 SELECT * FROM TypeData;
 
-DELETE FROM TypeData WHERE username = '__user' AND repo = '__repo';
-DELETE FROM Repositories WHERE repo = '__repo';
 DELETE FROM Users WHERE username = '__user';
 */
