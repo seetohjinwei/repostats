@@ -26,12 +26,13 @@
 		<h1 class="title">{data.username}'s {data.repo}</h1>
 
 		{#if !data.ok}
-			<p>Repository not found! <a href="..">Try another one?</a></p>
+			<p>Repository not found! <a href="/">Try another one?</a></p>
 		{:else}
 			<a target="_blank" rel="noopener noreferrer" href={githubLink}>{githubLink}</a>
 
 			<div class="content">
 				<div class="list">
+					<b>Top 5</b>
 					{#each truncatedLanguages as td}
 						<p>{td}</p>
 					{/each}
@@ -43,7 +44,9 @@
 			</div>
 
 			<p class="links">
-				<a class="more" href="..">Check out another!</a>
+				<a class="back" href="/">Home</a>
+				|
+				<a class="back" href="/{data.username}">Back</a>
 				| Made by
 				<a class="author" href="https://jinwei.dev" target="_blank" rel="noopener noreferrer"
 					>Jin Wei</a
@@ -99,10 +102,10 @@
 			}
 		}
 
-		.more {
+		.back {
 			&:hover,
 			&:active {
-				box-shadow: inset 18ch 0 0 0 $link-text;
+				box-shadow: inset 5ch 0 0 0 $link-text;
 			}
 		}
 

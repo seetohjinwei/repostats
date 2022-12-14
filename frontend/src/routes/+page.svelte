@@ -21,7 +21,12 @@
 			return;
 		}
 
-		if (repository === "" || !repositoryTest.test(repository)) {
+		if (repository === "") {
+			window.location.href += `${username}`;
+			return;
+		}
+
+		if (!repositoryTest.test(repository)) {
 			error = `"${repository}" is not a valid repository name!`;
 			return;
 		}
@@ -38,7 +43,7 @@
 		<form on:submit={handleSubmit}>
 			<div class="fields">
 				<input type="text" bind:value={username} placeholder="username" required />
-				<input type="text" bind:value={repository} placeholder="repository" required />
+				<input type="text" bind:value={repository} placeholder="repository" />
 			</div>
 
 			<div id="error" on:click={resetError} on:keypress={resetError}>{error}</div>
