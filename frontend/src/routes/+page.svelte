@@ -105,7 +105,6 @@
 			align-items: center;
 
 			margin-top: 6px;
-			background-color: $button-bg;
 			border-radius: 6px;
 			font-size: medium;
 			padding: 0.7ch 1.5ch;

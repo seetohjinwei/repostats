@@ -2,6 +2,19 @@
 	import type { PageData } from "./$types";
 
 	export let data: PageData;
+
+	async function handleForceRefresh() {
+		const res = await fetch(
+			`https://repostats.jinwei.dev/api/user_force?username=${data.username}`,
+		);
+
+		const json = await res.json();
+		if (json.data === undefined) {
+			return;
+		}
+
+		data.repos = json.data;
+	}
 </script>
 
 <h1 class="title">{data.username}'s repos</h1>
@@ -14,10 +27,14 @@
 			<p><a href="{data.username}/{repo.repo}">{repo.repo}</a></p>
 		{/each}
 	</div>
+
 	{#if data.repos.length == 30}
 		<!-- because GitHub API only returns first 30 -->
 		<p class="hint">(only first 30 repos are shown!)</p>
 	{/if}
+
+	<button on:click={handleForceRefresh} title="Please don't overuse this!">Refresh Data!</button>
+
 	<p class="links">
 		<a class="back" href="/">Home</a>
 		| Made by
@@ -89,5 +106,10 @@
 				box-shadow: inset 6ch 0 0 0 $link-text;
 			}
 		}
+	}
+
+	button {
+		border-radius: 6px;
+		padding: 0.3ch 0.7ch;
 	}
 </style>

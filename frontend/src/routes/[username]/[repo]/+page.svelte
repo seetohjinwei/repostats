@@ -15,10 +15,23 @@
 
 	const githubLink: string = `https://github.com/${data.username}/${data.repo}/`;
 
-	const sorted = Object.values(data.typeData).sort(TypeDataReverseCompareFn);
-	const languages = sorted.map(TypeDataPrettify);
-	const truncatedLanguages = languages.slice(0, LIMIT);
-	const [doughnutData, doughnutOptions] = TypeDataToChartJS(sorted, LIMIT);
+	$: sorted = Object.values(data.typeData).sort(TypeDataReverseCompareFn);
+	$: languages = sorted.map(TypeDataPrettify);
+	$: truncatedLanguages = languages.slice(0, LIMIT);
+	$: [doughnutData, doughnutOptions] = TypeDataToChartJS(sorted, LIMIT);
+
+	async function handleForceRefresh() {
+		const res = await fetch(
+			`https://repostats.jinwei.dev/api/repo_force?username=${data.username}&repo=${data.repo}`,
+		);
+
+		const json = await res.json();
+		if (json.data === undefined) {
+			return;
+		}
+
+		data.typeData = json.data;
+	}
 </script>
 
 <h1 class="title">{data.username}'s {data.repo}</h1>
@@ -41,10 +54,12 @@
 		</div>
 	</div>
 
+	<button on:click={handleForceRefresh} title="Please don't overuse this!">Refresh Data!</button>
+
 	<p class="links">
 		<a class="back" href="/">Home</a>
 		|
-		<a class="back" href="/{data.username}">Back</a>
+		<a class="back" href="/{data.username}">Repos</a>
 		| Made by
 		<a class="author" href="https://jinwei.dev" target="_blank" rel="noopener noreferrer">Jin Wei</a
 		>
@@ -105,5 +120,10 @@
 		.chart {
 			height: 200px;
 		}
+	}
+
+	button {
+		border-radius: 6px;
+		padding: 0.3ch 0.7ch;
 	}
 </style>
