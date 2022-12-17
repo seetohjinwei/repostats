@@ -21,65 +21,38 @@
 	const [doughnutData, doughnutOptions] = TypeDataToChartJS(sorted, LIMIT);
 </script>
 
-<div class="wrapper">
-	<div class="container">
-		<h1 class="title">{data.username}'s {data.repo}</h1>
+<h1 class="title">{data.username}'s {data.repo}</h1>
 
-		{#if !data.ok}
-			<p>Repository not found! <a href="/">Try another one?</a></p>
-		{:else}
-			<a target="_blank" rel="noopener noreferrer" href={githubLink}>{githubLink}</a>
+{#if !data.ok}
+	<p>Repository not found! <a href="/">Try another one?</a></p>
+{:else}
+	<a target="_blank" rel="noopener noreferrer" href={githubLink}>{githubLink}</a>
 
-			<div class="content">
-				<div class="list">
-					<b>Top 5</b>
-					{#each truncatedLanguages as td}
-						<p>{td}</p>
-					{/each}
-				</div>
+	<div class="content">
+		<div class="list">
+			<b>Top 5</b>
+			{#each truncatedLanguages as td}
+				<p>{td}</p>
+			{/each}
+		</div>
 
-				<div class="chart">
-					<Doughnut data={doughnutData} options={doughnutOptions} />
-				</div>
-			</div>
-
-			<p class="links">
-				<a class="back" href="/">Home</a>
-				|
-				<a class="back" href="/{data.username}">Back</a>
-				| Made by
-				<a class="author" href="https://jinwei.dev" target="_blank" rel="noopener noreferrer"
-					>Jin Wei</a
-				>
-			</p>
-		{/if}
+		<div class="chart">
+			<Doughnut data={doughnutData} options={doughnutOptions} />
+		</div>
 	</div>
-</div>
+
+	<p class="links">
+		<a class="back" href="/">Home</a>
+		|
+		<a class="back" href="/{data.username}">Back</a>
+		| Made by
+		<a class="author" href="https://jinwei.dev" target="_blank" rel="noopener noreferrer">Jin Wei</a
+		>
+	</p>
+{/if}
 
 <style lang="scss">
 	@import "../../../styles/colours.scss";
-
-	.wrapper {
-		height: 90vh;
-	}
-
-	.container {
-		position: relative;
-		top: 50%;
-		-webkit-transform: translateY(-50%);
-		-ms-transform: translateY(-50%);
-		transform: translateY(-50%);
-
-		text-align: center;
-
-		a {
-			color: $link-text;
-			&:hover,
-			&:active {
-				color: $link-text-focus;
-			}
-		}
-	}
 
 	.title {
 		margin: 0;

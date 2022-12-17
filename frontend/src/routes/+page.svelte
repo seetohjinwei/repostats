@@ -35,52 +35,32 @@
 	}
 </script>
 
-<div class="wrapper">
-	<div class="container">
-		<h1 class="title">RepoStats</h1>
-		<p class="subtitle">Statistics on your Repositories</p>
+<h1 class="title">RepoStats</h1>
+<p class="subtitle">Statistics on your Repositories</p>
 
-		<form on:submit={handleSubmit}>
-			<div class="fields">
-				<input type="text" bind:value={username} placeholder="username" required />
-				<input type="text" bind:value={repository} placeholder="repository" />
-			</div>
-
-			<div id="error" on:click={resetError} on:keypress={resetError}>{error}</div>
-			<button type="submit">Search <Icon name="right-arrow" /></button>
-		</form>
-
-		<p class="links">
-			<a
-				class="source"
-				href="https://github.com/seetohjinwei/repostats"
-				target="_blank"
-				rel="noopener noreferrer">Source Code</a
-			>
-			| Made by
-			<a class="author" href="https://jinwei.dev" target="_blank" rel="noopener noreferrer"
-				>Jin Wei</a
-			>
-		</p>
+<form on:submit={handleSubmit}>
+	<div class="fields">
+		<input type="text" bind:value={username} placeholder="username" required />
+		<input type="text" bind:value={repository} placeholder="repository" />
 	</div>
-</div>
+
+	<div id="error" on:click={resetError} on:keypress={resetError}>{error}</div>
+	<button type="submit">Search <Icon name="right-arrow" /></button>
+</form>
+
+<p class="links">
+	<a
+		class="source"
+		href="https://github.com/seetohjinwei/repostats"
+		target="_blank"
+		rel="noopener noreferrer">Source Code</a
+	>
+	| Made by
+	<a class="author" href="https://jinwei.dev" target="_blank" rel="noopener noreferrer">Jin Wei</a>
+</p>
 
 <style lang="scss">
 	@import "../styles/colours.scss";
-
-	.wrapper {
-		height: 90vh;
-	}
-
-	.container {
-		position: relative;
-		top: 50%;
-		-webkit-transform: translateY(-50%);
-		-ms-transform: translateY(-50%);
-		transform: translateY(-50%);
-
-		text-align: center;
-	}
 
 	.title {
 		font-size: 4em;

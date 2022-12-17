@@ -4,57 +4,30 @@
 	export let data: PageData;
 </script>
 
-<div class="wrapper">
-	<div class="container">
-		<h1 class="title">{data.username}'s repos</h1>
+<h1 class="title">{data.username}'s repos</h1>
 
-		{#if !data.ok}
-			<p>User not found! <a href="/">Try another one?</a></p>
-		{:else}
-			<div class="repos">
-				{#each data.repos as repo}
-					<p><a href="{data.username}/{repo.repo}">{repo.repo}</a></p>
-				{/each}
-			</div>
-			{#if data.repos.length == 30}
-				<!-- because GitHub API only returns first 30 -->
-				<p class="hint">(only first 30 repos are shown!)</p>
-			{/if}
-			<p class="links">
-				<a class="back" href="/">Home</a>
-				| Made by
-				<a class="author" href="https://jinwei.dev" target="_blank" rel="noopener noreferrer"
-					>Jin Wei</a
-				>
-			</p>
-		{/if}
+{#if !data.ok}
+	<p>User not found! <a href="/">Try another one?</a></p>
+{:else}
+	<div class="repos">
+		{#each data.repos as repo}
+			<p><a href="{data.username}/{repo.repo}">{repo.repo}</a></p>
+		{/each}
 	</div>
-</div>
+	{#if data.repos.length == 30}
+		<!-- because GitHub API only returns first 30 -->
+		<p class="hint">(only first 30 repos are shown!)</p>
+	{/if}
+	<p class="links">
+		<a class="back" href="/">Home</a>
+		| Made by
+		<a class="author" href="https://jinwei.dev" target="_blank" rel="noopener noreferrer">Jin Wei</a
+		>
+	</p>
+{/if}
 
 <style lang="scss">
 	@import "../../styles/colours.scss";
-
-	.wrapper {
-		height: 90vh;
-	}
-
-	.container {
-		position: relative;
-		top: 50%;
-		-webkit-transform: translateY(-50%);
-		-ms-transform: translateY(-50%);
-		transform: translateY(-50%);
-
-		text-align: center;
-
-		a {
-			color: $link-text;
-			&:hover,
-			&:active {
-				color: $link-text-focus;
-			}
-		}
-	}
 
 	.title {
 		margin: 0;
