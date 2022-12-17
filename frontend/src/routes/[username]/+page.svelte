@@ -109,6 +109,7 @@
 	}
 
 	button {
+		margin-top: 1em;
 		border-radius: 6px;
 		padding: 0.3ch 0.7ch;
 	}
