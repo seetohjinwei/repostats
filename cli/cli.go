@@ -7,6 +7,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/seetohjinwei/repostats/cli/messages"
+	"github.com/seetohjinwei/repostats/image"
 	"github.com/seetohjinwei/repostats/models"
 )
 
@@ -27,43 +28,47 @@ func initWalk() *models.Directory {
 }
 
 func Start(pool *pgxpool.Pool) {
-	index := 0
-	dirs := []*models.Directory{initWalk()}
+	image.Start()
 
-	fmt.Println(dirs[index].ListEverything())
+	/*
+		index := 0
+		dirs := []*models.Directory{initWalk()}
 
-	scanner := bufio.NewScanner(os.Stdin)
+		fmt.Println(dirs[index].ListEverything())
 
-	for {
-		fmt.Print(messages.PROMPT_OPTION)
-		scanner.Scan()
-		input := scanner.Text()
+		scanner := bufio.NewScanner(os.Stdin)
 
-		switch input {
-		case "..":
-			if index <= 0 {
-				fmt.Println("nothing to go back to")
-				continue
+		for {
+			fmt.Print(messages.PROMPT_OPTION)
+			scanner.Scan()
+			input := scanner.Text()
+
+			switch input {
+			case "..":
+				if index <= 0 {
+					fmt.Println("nothing to go back to")
+					continue
+				}
+				index--
+				fmt.Println(dirs[index].ListEverything())
+			case "help":
+				fmt.Print(messages.LIST_OPTIONS)
+			case "exit", "bye", "c":
+				os.Exit(0)
+			default:
+				sub, err := dirs[index].SubDirString(input)
+				if err != nil {
+					fmt.Println(err.Error())
+					continue
+				}
+				index++
+				if index >= len(dirs) {
+					dirs = append(dirs, sub)
+				} else {
+					dirs[index] = sub
+				}
+				fmt.Println(dirs[index].ListEverything())
 			}
-			index--
-			fmt.Println(dirs[index].ListEverything())
-		case "help":
-			fmt.Print(messages.LIST_OPTIONS)
-		case "exit", "bye", "c":
-			os.Exit(0)
-		default:
-			sub, err := dirs[index].SubDirString(input)
-			if err != nil {
-				fmt.Println(err.Error())
-				continue
-			}
-			index++
-			if index >= len(dirs) {
-				dirs = append(dirs, sub)
-			} else {
-				dirs[index] = sub
-			}
-			fmt.Println(dirs[index].ListEverything())
 		}
-	}
+	*/
 }

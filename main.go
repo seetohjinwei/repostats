@@ -19,7 +19,7 @@ var modes = map[string]func(*pgxpool.Pool){
 }
 
 func main() {
-	err := godotenv.Load("/root/git/repostats/.env")
+	err := godotenv.Load(".env")
 	if err != nil {
 		fmt.Println("Error loading .env file")
 		os.Exit(1)
