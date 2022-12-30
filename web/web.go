@@ -15,5 +15,7 @@ func Start(pool *pgxpool.Pool) {
 	router.GET("/repo", GetRepo(pool))
 	router.GET("/repo_force", ForceGetRepo(pool))
 
+	router.GET("/repo_image", GetUserImage(pool))
+
 	router.Run(":8083")
 }

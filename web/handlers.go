@@ -1,11 +1,13 @@
 package web
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/seetohjinwei/repostats/data"
+	"github.com/seetohjinwei/repostats/image"
 )
 
 // Returns username, ok from ctx.
@@ -37,6 +39,8 @@ func checkRepoQueries(ctx *gin.Context) (string, string, bool) {
 	return username, repo, true
 }
 
+var ErrBadRequest = errors.New("something went wrong!")
+
 func GetUser(pool *pgxpool.Pool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		username, ok := checkUserQueries(ctx)
@@ -46,7 +50,7 @@ func GetUser(pool *pgxpool.Pool) gin.HandlerFunc {
 
 		repos, err := data.QueryUser(pool, username)
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": ErrBadRequest})
 			return
 		}
 
@@ -63,7 +67,7 @@ func ForceGetUser(pool *pgxpool.Pool) gin.HandlerFunc {
 
 		repos, err := data.ForceQueryUser(pool, username)
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": ErrBadRequest})
 			return
 		}
 
@@ -80,7 +84,7 @@ func GetRepo(pool *pgxpool.Pool) gin.HandlerFunc {
 
 		typeData, err := data.QueryRepository(pool, username, repo)
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": ErrBadRequest})
 			return
 		}
 
@@ -97,10 +101,35 @@ func ForceGetRepo(pool *pgxpool.Pool) gin.HandlerFunc {
 
 		typeData, err := data.ForceQueryRepository(pool, username, repo)
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": ErrBadRequest})
 			return
 		}
 
 		ctx.JSON(http.StatusOK, gin.H{"data": typeData})
+	}
+}
+
+func GetUserImage(pool *pgxpool.Pool) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		username, repo, ok := checkRepoQueries(ctx)
+		if !ok {
+			return
+		}
+
+		typeData, err := data.QueryRepository(pool, username, repo)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": ErrBadRequest})
+			return
+		}
+
+		w := ctx.Writer
+		err = image.CreateUserSvg(w, username, typeData)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": ErrBadRequest})
+			return
+		}
+
+		ctx.Header("Content-Type", "image/svg+xml")
+		ctx.Status(http.StatusOK)
 	}
 }
