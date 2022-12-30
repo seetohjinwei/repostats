@@ -14,6 +14,7 @@
 	export let data: PageData;
 
 	const githubLink: string = `https://github.com/${data.username}/${data.repo}/`;
+	const bannerLink = `https://repostats.jinwei.dev/api/repo_image?username=${data.username}&repo=${data.repo}`;
 
 	$: sorted = Object.values(data.typeData).sort(TypeDataReverseCompareFn);
 	$: languages = sorted.map(TypeDataPrettify);
@@ -31,6 +32,19 @@
 		}
 
 		data.typeData = json.data;
+	}
+
+	let timeout: NodeJS.Timeout;
+	let copied: string = "";
+	function handleCopyBannerLink() {
+		navigator.clipboard.writeText(bannerLink);
+
+		copied = "Copied!";
+
+		clearTimeout(timeout);
+		timeout = setTimeout(() => {
+			copied = "";
+		}, 3000);
 	}
 </script>
 
@@ -55,6 +69,11 @@
 	</div>
 
 	<button on:click={handleForceRefresh} title="Please don't overuse this!">Refresh Data!</button>
+
+	<h3>Banner Link</h3>
+	<textarea readonly class="banner">{bannerLink}</textarea>
+	<button on:click={handleCopyBannerLink} title="A neat banner for your README!">Copy</button>
+	<p>{copied}</p>
 
 	<p class="links">
 		<a class="back" href="/">Home</a>
@@ -120,6 +139,16 @@
 		.chart {
 			height: 200px;
 		}
+	}
+
+	textarea.banner {
+		background-color: $page-bg;
+		color: $primary-text;
+		border: 1px solid $border;
+		border-radius: 6px;
+		height: 1em;
+		width: 20%;
+		min-width: 200px;
 	}
 
 	button {

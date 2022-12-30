@@ -16,15 +16,22 @@
 	}
 
 	.wrapper {
-		height: 90vh;
+		margin-top: 2em;
+
+		@media (min-width: 1000px) {
+			margin-top: 0;
+			height: 90vh;
+		}
 	}
 
 	.container {
-		position: relative;
-		top: 50%;
-		-webkit-transform: translateY(-50%);
-		-ms-transform: translateY(-50%);
-		transform: translateY(-50%);
+		@media (min-width: 1000px) {
+			position: relative;
+			top: 50%;
+			-webkit-transform: translateY(-50%);
+			-ms-transform: translateY(-50%);
+			transform: translateY(-50%);
+		}
 
 		text-align: center;
 
