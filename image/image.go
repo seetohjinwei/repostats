@@ -198,7 +198,13 @@ func min(a, b int) int {
 	return b
 }
 
+const noExtension = "no extension"
+
 func truncate(x string, limit int) string {
+	if x == "" {
+		return noExtension
+	}
+
 	if len(x) <= limit {
 		return x
 	}

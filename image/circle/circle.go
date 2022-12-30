@@ -33,19 +33,27 @@ var fullRadian = 2 * math.Pi
 
 /*
 M x y
-A rx ry x-axis-rotation large-arc-flag sweep-flag x y
+A rx ry x-axis-rotation large-arc-flag sweep-flag x y  (mid)
+A rx ry x-axis-rotation large-arc-flag sweep-flag x y  (end)
 L x y
 */
-var pathDFormat = `M %.2f %.2f A %.2f %.2f 0 0 1 %.2f %.2f L %.2f %.2f`
+var pathDFormat = `M %.2f %.2f A %.2f %.2f 0 0 1 %.2f %.2f A %.2f %.2f 0 0 1 %.2f %.2f L %.2f %.2f`
 
 // NewSlice creates a slice with start, end in percentages.
 func (c *Circle) NewSlice(start, end float64) string {
+	// mid point is required because larger slices will take a "shortcut" instead
+	mid := start + (end-start)/2
 	startPoint := c.circumferencePoint(start * fullRadian)
+	midPoint := c.circumferencePoint(mid * fullRadian)
 	endPoint := c.circumferencePoint(end * fullRadian)
 
 	origin := c.point
 
-	return fmt.Sprintf(pathDFormat, startPoint.x, startPoint.y, c.radius, c.radius, endPoint.x, endPoint.y, origin.x, origin.y)
+	return fmt.Sprintf(pathDFormat,
+		startPoint.x, startPoint.y,
+		c.radius, c.radius, midPoint.x, midPoint.y,
+		c.radius, c.radius, endPoint.x, endPoint.y,
+		origin.x, origin.y)
 }
 
 /*
