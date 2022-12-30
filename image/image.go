@@ -25,17 +25,18 @@ const (
 	textAlign  = "start"
 	textColour = "#eeeeee"
 
-	titleSize      = 20
-	titleGap       = 16
-	titleMaxLength = 20
-	titleX         = marginX + 10
-	titleY         = marginY + titleSize
+	titleSize           = 20
+	titleGap            = 16
+	titleTruncateLength = 40
+	titleMaxLength      = 20
+	titleX              = marginX + 10
+	titleY              = marginY + titleSize
 
-	listSize      = 16
-	listGap       = 16
-	listMaxLength = 16
-	listX         = titleX + 4
-	listY         = titleY + titleSize*2
+	listSize           = 16
+	listGap            = 16
+	listTruncateLength = 16
+	listX              = titleX + 4
+	listY              = titleY + titleSize*2
 
 	pieRadius float64 = imageHeight/2 - marginY
 	pieX      float64 = imageWidth - pieRadius - marginX
@@ -117,7 +118,7 @@ func CreateUserSvg(w io.Writer, username string, typeData map[string]models.Type
 
 var ErrNot100 = errors.New("values do not add to 100")
 
-func createUserSvg(w io.Writer, username string, values []item) error {
+func createUserSvg(w io.Writer, title string, values []item) error {
 	canvas := svg.New(w)
 	canvas.Start(imageWidth, imageHeight)
 
@@ -126,7 +127,7 @@ func createUserSvg(w io.Writer, username string, values []item) error {
 	canvas.Roundrect(0, 0, imageWidth, imageHeight, backgroundRound, backgroundRound, s)
 
 	// username
-	wrappedUsername := wrapText(username)
+	wrappedUsername := wrapText(truncate(title, titleTruncateLength))
 	titleYPad := 0
 	if len(wrappedUsername) == 1 {
 		titleYPad = titleSize / 2
@@ -179,21 +180,12 @@ func wrapText(text string) []string {
 }
 
 func languagesList(items []item) []string {
-	truncate := func(x string) string {
-		if len(x) <= listMaxLength {
-			return x
-		}
-
-		sub := x[:listMaxLength-2] + ".."
-		return sub
-	}
-
 	const format = "%d: %s (%.1f%%)"
 
 	list := make([]string, len(items))
 
 	for i, item := range items {
-		list[i] = fmt.Sprintf(format, i+1, truncate(item.name), item.ratio)
+		list[i] = fmt.Sprintf(format, i+1, truncate(item.name, listTruncateLength), item.ratio)
 	}
 
 	return list
@@ -204,4 +196,13 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func truncate(x string, limit int) string {
+	if len(x) <= limit {
+		return x
+	}
+
+	sub := x[:limit-2] + ".."
+	return sub
 }

@@ -14,6 +14,12 @@ https://repostats.jinwei.dev/
 | PostgreSQL          | caching data to not get banned  |
 | GitHub API          | i don't want to write a crawler |
 
+## Banner Generation!
+
+You can generate an awesome banner to place in your README.md!
+
+<img src="https://repostats.jinwei.dev/api/repo_image?username=seetohjinwei&repo=repostats"/>
+
 ## Blog Post
 
 Learn more about RepoStats in my blog post!

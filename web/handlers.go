@@ -3,6 +3,7 @@ package web
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -111,6 +112,10 @@ func ForceGetRepo(pool *pgxpool.Pool) gin.HandlerFunc {
 
 func GetUserImage(pool *pgxpool.Pool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		ctx.Header("Content-Type", "image/svg+xml")
+		ctx.Header("cache-control", "max-age=86400, public")
+		ctx.Header("Pragma", "public")
+		ctx.Header("Expires", time.Now().Add(86400*time.Second).Format(time.RFC1123))
 		username, repo, ok := checkRepoQueries(ctx)
 		if !ok {
 			return
@@ -123,13 +128,12 @@ func GetUserImage(pool *pgxpool.Pool) gin.HandlerFunc {
 		}
 
 		w := ctx.Writer
-		err = image.CreateUserSvg(w, username, typeData)
+		err = image.CreateUserSvg(w, repo, typeData)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": ErrBadRequest})
 			return
 		}
 
-		ctx.Header("Content-Type", "image/svg+xml")
 		ctx.Status(http.StatusOK)
 	}
 }
