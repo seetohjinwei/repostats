@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
-	"os"
 
 	svg "github.com/ajstarks/svgo"
 	"github.com/seetohjinwei/repostats/image/circle"
@@ -18,7 +16,7 @@ const (
 	backgroundRound  = 6
 	backgroundColour = "#171214"
 
-	imageWidth  = 350
+	imageWidth  = 380
 	imageHeight = 180
 
 	marginX = 10
@@ -27,11 +25,17 @@ const (
 	textAlign  = "start"
 	textColour = "#eeeeee"
 
-	titleSize      = 18
+	titleSize      = 20
 	titleGap       = 16
-	titleMaxLength = 18
+	titleMaxLength = 20
 	titleX         = marginX + 10
-	titleY         = marginY + titleSize + 10
+	titleY         = marginY + titleSize
+
+	listSize      = 16
+	listGap       = 16
+	listMaxLength = 16
+	listX         = titleX + 4
+	listY         = titleY + titleSize*2
 
 	pieRadius float64 = imageHeight/2 - marginY
 	pieX      float64 = imageWidth - pieRadius - marginX
@@ -40,7 +44,7 @@ const (
 	watermarkSize = 12
 	watermark     = "by RepoStats"
 	watermarkX    = marginX + 14
-	watermarkY    = imageHeight - watermarkSize - marginY
+	watermarkY    = imageHeight - marginY
 )
 
 type item struct {
@@ -122,7 +126,15 @@ func createUserSvg(w io.Writer, username string, values []item) error {
 	canvas.Roundrect(0, 0, imageWidth, imageHeight, backgroundRound, backgroundRound, s)
 
 	// username
-	canvas.Textlines(titleX, titleY, wrapText(username), titleSize, titleGap, textColour, textAlign)
+	wrappedUsername := wrapText(username)
+	titleYPad := 0
+	if len(wrappedUsername) == 1 {
+		titleYPad = titleSize / 2
+	}
+	canvas.Textlines(titleX, titleY+titleYPad, wrappedUsername, titleSize, titleGap, textColour, textAlign)
+
+	// languages list
+	canvas.Textlines(listX, listY, languagesList(values), listSize, listGap, textColour, textAlign)
 
 	// pie chart
 	circle := circle.New(pieX, pieY, pieRadius)
@@ -166,22 +178,25 @@ func wrapText(text string) []string {
 	return lines
 }
 
-func Start() {
-	username := "seetohjinwei"
+func languagesList(items []item) []string {
+	truncate := func(x string) string {
+		if len(x) <= listMaxLength {
+			return x
+		}
 
-	items := []item{
-		{"a", 10, "green"},
-		{"b", 20, "blue"},
-		{"c", 29, "red"},
-		{"d", 41, "orange"},
+		sub := x[:listMaxLength-2] + ".."
+		return sub
 	}
 
-	f, _ := os.Create("s.svg")
+	const format = "%d: %s (%.1f%%)"
 
-	err := createUserSvg(f, username, items)
-	if err != nil {
-		log.Fatal(err)
+	list := make([]string, len(items))
+
+	for i, item := range items {
+		list[i] = fmt.Sprintf(format, i+1, truncate(item.name), item.ratio)
 	}
+
+	return list
 }
 
 func min(a, b int) int {

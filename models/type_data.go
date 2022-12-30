@@ -42,10 +42,10 @@ func (td TypeData) ToFormatted() string {
 //
 // Specifically, sort by bytes, file count, type (alphabetical).
 func LessTypeData(x, y TypeData) bool {
-	if x.Bytes != y.Bytes {
-		return x.Bytes < y.Bytes
-	} else if x.FileCount != y.FileCount {
+	if x.FileCount != y.FileCount {
 		return x.FileCount < y.FileCount
+	} else if x.Bytes != y.Bytes {
+		return x.Bytes < y.Bytes
 	}
 	return x.Type < y.Type
 }
