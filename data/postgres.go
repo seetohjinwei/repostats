@@ -148,7 +148,7 @@ func cleanDatabase(pool *pgxpool.Pool) (CleanedData, error) {
 	DELETE FROM repositories AS r
 	USING users AS u
 	WHERE r.username = u.username
-	AND NOW() - u.last_updated > INTERVAL '1 MINUTE';
+	AND NOW() - u.last_updated > INTERVAL '1 HOUR';
 	`)
 	if err != nil {
 		return cleanedData, err
@@ -161,7 +161,7 @@ func cleanDatabase(pool *pgxpool.Pool) (CleanedData, error) {
 	DELETE FROM typedata AS td
 	USING repositories AS r
 	WHERE td.username = r.username AND td.repo = r.repo
-	AND NOW() - r.last_updated > INTERVAL '1 MINUTE';
+	AND NOW() - r.last_updated > INTERVAL '1 HOUR';
 	`)
 	if err != nil {
 		return cleanedData, err
