@@ -12,6 +12,8 @@ import (
 // Without the token, the rate-limit is only 60.
 const CACHE_DURATION time.Duration = time.Hour * 1
 
+// Note: When changing CACHE_DURATION this, be sure to update data.cleanDatabase too.
+
 // Queries user, with potentially cached result.
 func QueryUser(pool *pgxpool.Pool, username string) ([]models.PSQLRepository, error) {
 	last_updated, err := queryUserLastUpdated(pool, username)
@@ -63,4 +65,14 @@ func ForceQueryRepository(pool *pgxpool.Pool, username, repo string) (map[string
 	updateTypeData(pool, username, repo, branch, maps.Values(typeData))
 
 	return typeData, nil
+}
+
+// Cleans outdated data from database.
+func CleanDatabase(pool *pgxpool.Pool) (CleanedData, error) {
+	cleanedData, err := cleanDatabase(pool)
+	if err != nil {
+		return cleanedData, err
+	}
+
+	return cleanedData, nil
 }

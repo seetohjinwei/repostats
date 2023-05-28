@@ -40,7 +40,10 @@ func checkRepoQueries(ctx *gin.Context) (string, string, bool) {
 	return username, repo, true
 }
 
-var ErrBadRequest = errors.New("something went wrong!")
+var (
+	ErrBadRequest          = errors.New("something went wrong!")
+	ErrInternalServerError = errors.New("something went on our end, try again later")
+)
 
 func GetUser(pool *pgxpool.Pool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -135,5 +138,28 @@ func GetUserImage(pool *pgxpool.Pool) gin.HandlerFunc {
 		}
 
 		ctx.Status(http.StatusOK)
+	}
+}
+
+// Cleans outdated data from database.
+func CleanDatabase(pool *pgxpool.Pool) (data.CleanedData, error) {
+	cleanedData, err := data.CleanDatabase(pool)
+	if err != nil {
+		return cleanedData, err
+	}
+	return cleanedData, nil
+}
+
+func PostCleanDatabase(pool *pgxpool.Pool) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		cleanedData, err := CleanDatabase(pool)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": ErrInternalServerError})
+			return
+		}
+		ctx.JSON(http.StatusCreated, gin.H{
+			"repoCount":     cleanedData.RepoCount,
+			"typeDataCount": cleanedData.TypeDataCount,
+		})
 	}
 }

@@ -131,3 +131,43 @@ func queryCachedRepository(pool *pgxpool.Pool, username, repo string) (map[strin
 
 	return typeData, nil
 }
+
+type CleanedData struct {
+	RepoCount     int64
+	TypeDataCount int64
+}
+
+// Cleans outdated data from database.
+func cleanDatabase(pool *pgxpool.Pool) (CleanedData, error) {
+	cleanedData := CleanedData{}
+
+	// Clear outdated repositories.
+	// Some rows deleted would not be "truly" outdated, but that's fine.
+	// Also, deletes TypeData under the repository due to ON DELETE CASCADE.
+	rows, err := pool.Query(context.Background(), `
+	DELETE FROM repositories AS r
+	USING users AS u
+	WHERE r.username = u.username
+	AND NOW() - u.last_updated > INTERVAL '1 MINUTE';
+	`)
+	if err != nil {
+		return cleanedData, err
+	}
+	rows.Close()
+	cleanedData.RepoCount = rows.CommandTag().RowsAffected()
+
+	// Clear outdated typedata.
+	rows, err = pool.Query(context.Background(), `
+	DELETE FROM typedata AS td
+	USING repositories AS r
+	WHERE td.username = r.username AND td.repo = r.repo
+	AND NOW() - r.last_updated > INTERVAL '1 MINUTE';
+	`)
+	if err != nil {
+		return cleanedData, err
+	}
+	rows.Close()
+	cleanedData.TypeDataCount = rows.CommandTag().RowsAffected()
+
+	return cleanedData, nil
+}
