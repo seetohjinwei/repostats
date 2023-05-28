@@ -79,6 +79,11 @@ func getRepositoryWithData(owner, name, branch string) (map[string]models.TypeDa
 	var response map[string]interface{}
 	json.Unmarshal(bytes, &response)
 
+	// Handle empty repository.
+	if response["tree"] == nil {
+		return typeData, nil
+	}
+
 	for _, o := range response["tree"].([]interface{}) {
 		object := o.(map[string]interface{})
 		if object["size"] == nil {
