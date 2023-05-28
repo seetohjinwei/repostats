@@ -16,7 +16,11 @@ https://repostats.jinwei.dev/
 
 ## Banner Generation!
 
-You can generate an awesome banner to place in your README.md!
+You can even generate an awesome banner to place in your `README.md` with just a single line:
+
+```markdown
+<img src="https://repostats.jinwei.dev/api/repo_image?username=seetohjinwei&repo=repostats"/>
+```
 
 <img src="https://repostats.jinwei.dev/api/repo_image?username=seetohjinwei&repo=repostats"/>
 
